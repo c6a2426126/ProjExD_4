@@ -371,7 +371,7 @@ def main():
     tmr = 0
     clock = pg.time.Clock()
     while True:
-        key_lst = pg.key.get_pressed()
+        key_lst = pg.key.get_pressed()        
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return 0
@@ -389,13 +389,11 @@ def main():
                 if score.value >= 20:
                     score.value -= 20
                     emp.activate()   # EMP発動
-            
             # シールド生成
             if event.type == pg.KEYDOWN and event.key == pg.K_s:
                 if score.value >= 50 and len(shields) == 0:
                     shields.add(Shield(bird, 400))
                     score.value -= 50
-
         screen.blit(bg_img, [0, 0])
 
         if tmr%200 == 0:  # 200フレームに1回，敵機を出現させる
@@ -443,6 +441,17 @@ def main():
             for emy in pg.sprite.spritecollide(grv, emys, True):
                 exps.add(Explosion(emy, 100))
                 score.value += 10
+        for bomb in pg.sprite.spritecollide(bird, bombs, True):  # こうかとんと衝突した爆弾リスト
+            if bird.state == "hyper":
+                # 無敵状態中は爆弾を破壊し、スコアを1点追加
+                exps.add(Explosion(bomb, 50))
+                score.value += 1
+            else:
+                bird.change_img(8, screen)  # こうかとん悲しみエフェクト
+                score.update(screen)
+                pg.display.update()
+                time.sleep(2)
+                return
 
         bird.update(key_lst, screen)
         beams.update()
